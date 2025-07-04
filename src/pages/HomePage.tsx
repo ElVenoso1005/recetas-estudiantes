@@ -1,18 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useRecipes } from '../hooks/useRecipes';
 import RecipeCard from '../components/RecipeCard';
+import SearchBar from '../components/SearchBar'; 
 
 const HomePage: React.FC = () => {
   const { recetas } = useRecipes();
 
-  // Obtener las recetas más valoradas (top 3)
-  const recetasDestacadas = recetas
+  const [filteredRecetas, setFilteredRecetas] = useState(recetas);
+
+  const handleSearch = (query: string) => {
+    const resultados = recetas.filter(receta =>
+      receta.nombre.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredRecetas(resultados);
+  };
+
+  const recetasDestacadas = filteredRecetas
     .sort((a, b) => b.valoracion - a.valoracion)
     .slice(0, 3);
 
-  // Obtener recetas rápidas (menos de 20 minutos)
-  const recetasRapidas = recetas
+  const recetasRapidas = filteredRecetas
     .filter(receta => receta.tiempo <= 20)
     .slice(0, 3);
 
@@ -24,6 +32,9 @@ const HomePage: React.FC = () => {
           <p className="hero-subtitle">
             Deliciosas recetas fáciles, rápidas y económicas para estudiantes universitarios
           </p>
+
+          <SearchBar onSearch={handleSearch} />
+
           <div className="hero-buttons">
             <Link to="/recetas" className="cta-button primary">
               Explorar Recetas
@@ -62,18 +73,18 @@ const HomePage: React.FC = () => {
       <section className="stats-section">
         <div className="stats-container">
           <div className="stat-item">
-            <span className="stat-number">{recetas.length}</span>
+            <span className="stat-number">{filteredRecetas.length}</span>
             <span className="stat-label">Recetas</span>
           </div>
           <div className="stat-item">
             <span className="stat-number">
-              {Math.round(recetas.reduce((acc, r) => acc + r.tiempo, 0) / recetas.length)}
+              {Math.round(filteredRecetas.reduce((acc, r) => acc + r.tiempo, 0) / filteredRecetas.length)}
             </span>
             <span className="stat-label">Min Promedio</span>
           </div>
           <div className="stat-item">
             <span className="stat-number">
-              {recetas.filter(r => r.dificultad === 'fácil').length}
+              {filteredRecetas.filter(r => r.dificultad === 'fácil').length}
             </span>
             <span className="stat-label">Recetas Fáciles</span>
           </div>
